@@ -1,0 +1,16 @@
+{
+  "name": "enetwrapperfornodejs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "install": "node-gyp rebuild"
+  },
+  "dependencies": {
+    "node-addon-api": "*"
+  },
+  "author": "Alexander",
+  "license": "MIT",
+  "gypfile": true
+}
