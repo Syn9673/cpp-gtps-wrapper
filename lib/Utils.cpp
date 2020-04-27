@@ -53,8 +53,8 @@ uint32_t Utils::HashString(unsigned char* str, int len)
 			acc = (acc >> 27) + (acc << 5) + *n++;
 		}
 	}
-	return acc;
 
+	return acc;
 }
 
 std::ifstream::pos_type Utils::filesize(const char* filename)

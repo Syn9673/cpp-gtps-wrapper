@@ -18,12 +18,12 @@ class Gtps
 	public:
 		Gtps();
 
-		int ch2n(char x);
-		GamePacket appendString(GamePacket p, std::string s);
-		GamePacket createPacket();
-		GamePacket packetEnd(GamePacket p);
-		GamePacket appendInt(GamePacket p, int val);
-		GamePacket appendIntx(GamePacket p, int val);
+		static int ch2n(char x);
+		static GamePacket appendString(GamePacket p, std::string s);
+		static GamePacket createPacket();
+		static GamePacket packetEnd(GamePacket p);
+		static GamePacket appendInt(GamePacket p, int val);
+		static GamePacket appendIntx(GamePacket p, int val);
 };
 
 #endif GTPS_H
