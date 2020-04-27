@@ -3,6 +3,10 @@
 #include <cstring>
 #include <fstream>
 #include "Utils.h"
+#include "Packet.h"
+#include "Gtps.h"
+
+BYTE* itemsDat;
 
 ENetPeer* Utils::peer;
 ENetHost* Utils::server;
@@ -32,6 +36,44 @@ unsigned char* Utils::getA(std::string fileName, int* pSizeOut, bool bAddBasePat
 	fclose(fp);
 
 	return pData;
+}
+
+void Utils::buildItemsDatabase(std::string location)
+{
+	std::string secret = "PBG892FXX982ABC*";
+	std::ifstream file(location, std::ios::binary | std::ios::ate);
+	int size = file.tellg();
+	char* data = new char[size];
+	file.seekg(0, std::ios::beg);
+
+	if (file.read((char*)(data), size))
+	{
+		itemsDat = new BYTE[60 + size];
+		std::string asdf = "0400000010000000FFFFFFFF000000000800000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+
+		for (int i = 0; i < asdf.length(); i += 2)
+		{
+			char x = Gtps::ch2n(asdf[i]);
+			x = x << 4;
+			x += Gtps::ch2n(asdf[i + 1]);
+			memcpy(itemsDat + (i / 2), &x, 1);
+			if (asdf.length() > 60 * 2) throw 0;
+		}
+
+		memcpy(itemsDat + 56, &size, 4);
+		file.seekg(0, std::ios::beg);
+
+		if (file.read((char*)(itemsDat + 60), size))
+		{
+			uint8_t* pData;
+			int size = 0;
+			const char filename[] = "items.dat";
+			size = filesize(filename);
+			pData = getA((std::string)filename, &size, false, false);
+			itemdathash = HashString((unsigned char*)pData, size);
+			file.close();
+		}
+	}
 }
 
 uint32_t Utils::HashString(unsigned char* str, int len)
