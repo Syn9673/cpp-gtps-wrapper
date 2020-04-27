@@ -1,6 +1,8 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+extern BYTE* itemsDat;
+
 class Utils
 {
 	private:
@@ -21,6 +23,7 @@ class Utils
 		ENetHost* getServer();
 		int GetMessageTypeFromPacket(ENetPacket* packet);
 		std::string GetTextPointerFromPacket(ENetPacket* packet);
+		void buildItemsDatabase(std::string location);
 };
 
 #endif
