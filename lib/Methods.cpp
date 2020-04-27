@@ -33,9 +33,9 @@ void Methods::sendItemsData(Utils* utils)
 	}
 }
 
-void Methods::_enet_initialize(std::promise<int>* promise)
+int Methods::_enet_initialize()
 {
-	promise->set_value(enet_initialize());
+	return enet_initialize();
 }
 
 void Methods::sendWorldRequest(Utils* utils)
@@ -62,4 +62,16 @@ void Methods::sendConsoleMessage(std::string message, Utils* utils)
 void Methods::sendLoginPacket(Utils* utils)
 {
 	Packets::sendLoginPacket(utils->getPeer());
+}
+
+void Methods::hostCreate(Napi::Env env, Napi::Object argObject, ENetAddress address, Utils* utils)
+{
+	address.host = ENET_HOST_ANY;
+	address.port = argObject.Get("port").As<Napi::Number>().Uint32Value();
+
+	utils->setServer(enet_host_create(&address,
+		argObject.Get("channels").As<Napi::Number>().Uint32Value(),
+		argObject.Get("peers").As<Napi::Number>().Uint32Value(),
+		argObject.Get("incomingBandwith").As<Napi::Number>().Uint32Value(),
+		argObject.Get("outgoingBandwith").As<Napi::Number>().Uint32Value()));
 }

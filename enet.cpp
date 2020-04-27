@@ -1,10 +1,9 @@
 #include <iostream>
 #include "napi.h"
 #include <enet/enet.h>
+#include <omp.h>
 #include <fstream>
 #include <cstring>
-#include <thread>
-#include <future>
 #include "lib/Utils.h"
 #include "lib/Gtps.h"
 #include "lib/Packet.h"
@@ -18,13 +17,19 @@ Gtps gtps;
 Napi::Object addressData;
 Napi::Object threadObj;
 
+int threadCount;
+
 Methods methods;
 
 Napi::Value buildItemsDatabase(const Napi::CallbackInfo& args)
 {
 	Napi::Env env = args.Env();
-	std::thread th(methods.buildItemsDatabase, args[0].As<Napi::String>().Utf8Value(), &utils);
-	th.join();
+
+	omp_set_num_threads(threadCount);
+	#pragma omp parallel
+	{
+		methods.buildItemsDatabase(args[0].As<Napi::String>().Utf8Value(), &utils);
+	}
 
 	return Napi::Value();
 }
@@ -32,8 +37,13 @@ Napi::Value buildItemsDatabase(const Napi::CallbackInfo& args)
 Napi::Value sendWorldError(const Napi::CallbackInfo& args)
 {	
 	Napi::Env env = args.Env();
-	std::thread th(methods.sendWorldError, &utils);
-	th.join();
+
+	omp_set_num_threads(threadCount);
+
+	#pragma omp parallel
+	{
+		methods.sendWorldError(&utils);
+	}
 
 	return Napi::Value();
 }
@@ -41,8 +51,13 @@ Napi::Value sendWorldError(const Napi::CallbackInfo& args)
 Napi::Value sendItemsData(const Napi::CallbackInfo& args)
 {
 	Napi::Env env = args.Env();
-	std::thread th(methods.sendItemsData, &utils);
-	th.join();
+
+	omp_set_num_threads(threadCount);
+
+	#pragma omp parallel
+	{
+		methods.sendItemsData(&utils);
+	}
 
 	return Napi::Value();
 }
@@ -50,8 +65,13 @@ Napi::Value sendItemsData(const Napi::CallbackInfo& args)
 Napi::Value sendLoginPacket(const Napi::CallbackInfo& args)
 {
 	Napi::Env env = args.Env();
-	std::thread th(methods.sendLoginPacket, &utils);
-	th.join();
+
+	omp_set_num_threads(threadCount);
+
+	#pragma omp parallel
+	{
+		methods.sendLoginPacket(&utils);
+	}
 
 	return Napi::Value();
 }
@@ -61,8 +81,12 @@ Napi::Value sendConsoleMessage(const Napi::CallbackInfo& args)
 	Napi::Env env = args.Env();
 	std::string message = args[0].As<Napi::String>().Utf8Value();
 
-	std::thread th(methods.sendConsoleMessage, message, &utils);
-	th.join();
+	omp_set_num_threads(threadCount);
+
+	#pragma omp parallel
+	{
+		methods.sendConsoleMessage(message, &utils);
+	}
 
 	return Napi::Value();
 }
@@ -71,8 +95,13 @@ Napi::Value sendDialogRequest(const Napi::CallbackInfo& args)
 {
 	Napi::Env env = args.Env();
 	std::string message = args[0].As<Napi::String>().Utf8Value();
-	std::thread th(methods.sendDialogRequest, message, &utils);
-	th.join();
+
+	omp_set_num_threads(threadCount);
+
+	#pragma omp parallel
+	{
+		methods.sendDialogRequest(message, &utils);
+	}
 
 	return Napi::Value();
 }
@@ -86,8 +115,12 @@ Napi::Value sendData(const Napi::CallbackInfo& args)
 	int len = args[2].As<Napi::Number>().Uint32Value();
 	char data[10] = "";
 
-	std::thread th(methods.sendData, data, _data, num, len, &utils);
-	th.join();
+	omp_set_num_threads(threadCount);
+
+	#pragma omp parallel
+	{
+		methods.sendData(data, _data, num, len, &utils);
+	}
 
 	return Napi::Value();
 }
@@ -95,13 +128,16 @@ Napi::Value sendData(const Napi::CallbackInfo& args)
 Napi::Number _enet_initialize(const Napi::CallbackInfo& args)
 {
 	Napi::Env env = args.Env();
+	int res;
 
-	std::promise<int> promise;
-	std::future<int> future = promise.get_future();
-	std::thread th(methods._enet_initialize, &promise);
-	th.join();
+	omp_set_num_threads(threadCount);
 
-	return Napi::Number::New(env, future.get());
+	#pragma omp parallel
+	{
+		res = methods._enet_initialize();
+	}
+
+	return Napi::Number::New(env, res);
 }
 
 Napi::Value hostCreate(const Napi::CallbackInfo& args)
@@ -113,15 +149,13 @@ Napi::Value hostCreate(const Napi::CallbackInfo& args)
 		throw Napi::TypeError::New(env, "Please pass an object for the arguments.");
 	}
 
-	Napi::Object argObject = args[0].As<Napi::Object>().ToObject();
-	address.host = ENET_HOST_ANY;
-	address.port = argObject.Get("port").As<Napi::Number>().Uint32Value();
+	omp_set_num_threads(threadCount);
 
-	utils.setServer(enet_host_create(&address,
-		argObject.Get("channels").As<Napi::Number>().Uint32Value(),
-		argObject.Get("peers").As<Napi::Number>().Uint32Value(),
-		argObject.Get("incomingBandwith").As<Napi::Number>().Uint32Value(),
-		argObject.Get("outgoingBandwith").As<Napi::Number>().Uint32Value()));
+	#pragma omp parallel
+  {
+  	Napi::Object argObject = args[0].As<Napi::Object>().ToObject();
+  	methods.hostCreate(env, argObject, address, &utils);
+  }
 
 	return Napi::Value();
 }
@@ -180,9 +214,21 @@ Napi::Value startServer(const Napi::CallbackInfo& args)
 Napi::Value sendWorldRequest(const Napi::CallbackInfo& args)
 {
 	Napi::Env env = args.Env();
-	std::thread th(methods.sendWorldRequest, &utils);
-	th.join();
+	omp_set_num_threads(threadCount);
 
+	#pragma omp parallel
+	{
+		methods.sendWorldRequest(&utils);
+	}
+
+	return Napi::Value();
+}
+
+Napi::Value setThreadCount(const Napi::CallbackInfo& args)
+{
+	Napi::Env env = args.Env();
+
+	threadCount = args[0].As<Napi::Number>().Uint32Value();
 	return Napi::Value();
 }
 
@@ -199,6 +245,7 @@ Napi::Object Init(Napi::Env env, Napi::Object exports)
 	exports.Set(Napi::String::New(env, "sendItemsData"), Napi::Function::New(env, sendItemsData));
 	exports.Set(Napi::String::New(env, "sendWorldRequest"), Napi::Function::New(env, sendWorldRequest));
 	exports.Set(Napi::String::New(env, "sendWorldError"), Napi::Function::New(env, sendWorldError));
+	exports.Set(Napi::String::New(env, "setThreadCount"), Napi::Function::New(env, setThreadCount));
 	return exports;
 }
 
