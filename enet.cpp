@@ -2,7 +2,7 @@
 #include "napi.h"
 #include <enet/enet.h>
 #include <fstream>
-#include <cstdio>
+#include <cstring>
 #include "lib/Utils.h"
 #include "lib/Gtps.h"
 #include "lib/Packet.h"

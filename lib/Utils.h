@@ -11,7 +11,7 @@ class Utils
 		Utils();
 		Utils(ENetPeer* _peer, ENetHost* _server);
 
-		unsigned char* Utils::getA(std::string fileName, int* pSizeOut, bool bAddBasePath, bool bAutoDecompress);
+		unsigned char* getA(std::string fileName, int* pSizeOut, bool bAddBasePath, bool bAutoDecompress);
 		std::ifstream::pos_type filesize(const char* filename);
 		uint32_t HashString(unsigned char* str, int len);
 		void setPeer(ENetPeer* peer);
