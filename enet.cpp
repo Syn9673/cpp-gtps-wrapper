@@ -4,156 +4,23 @@
 #include <fstream>
 #include <cstdio>
 #include "lib/Utils.h"
+#include "lib/Gtps.h"
 
 ENetAddress address;
 
 Utils utils = Utils();
-
-typedef unsigned short enet_uint16;
-typedef unsigned int enet_uint32;
-typedef unsigned char enet_uint8;
-typedef unsigned char BYTE;
+Gtps gtps = Gtps();
 
 BYTE* itemsDat;
 int itemsDatSize, itemdathash;
 
-struct GamePacket
-{
-	BYTE* data;
-	int len;
-	int indexes;
-};
-
 Napi::Object addressData;
 
-int ch2n(char x)
-{
-	switch (x)
-	{
-	case '0':
-		return 0;
-	case '1':
-		return 1;
-	case '2':
-		return 2;
-	case '3':
-		return 3;
-	case '4':
-		return 4;
-	case '5':
-		return 5;
-	case '6':
-		return 6;
-	case '7':
-		return 7;
-	case '8':
-		return 8;
-	case '9':
-		return 9;
-	case 'A':
-		return 10;
-	case 'B':
-		return 11;
-	case 'C':
-		return 12;
-	case 'D':
-		return 13;
-	case 'E':
-		return 14;
-	case 'F':
-		return 15;
-	default:
-		break;
-	}
-}
-
-GamePacket appendString(GamePacket p, std::string str)
-{
-	//p.data[56] += 1;
-	BYTE* n = new BYTE[p.len + 2 + str.length() + 4];
-	memcpy(n, p.data, p.len);
-	delete p.data;
-	p.data = n;
-	n[p.len] = p.indexes;
-	n[p.len + 1] = 2;
-	int sLen = str.length();
-	memcpy(n+p.len+2, &sLen, 4);
-	memcpy(n + p.len + 6, str.c_str(), sLen);
-	p.len = p.len + 2 + str.length() + 4;
-	p.indexes++;
-	return p;
-}
-
-GamePacket createPacket()
-{
-	BYTE* data = new BYTE[61];
-	std::string asdf = "0400000001000000FFFFFFFF00000000080000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
-	for (int i = 0; i < asdf.length(); i += 2)
-	{
-		char x = ch2n(asdf[i]);
-		x = x << 4;
-		x += ch2n(asdf[i + 1]);
-		memcpy(data + (i / 2), &x, 1);
-		if (asdf.length() > 61 * 2) throw 0;
-	}
-	GamePacket packet;
-	packet.data = data;
-	packet.len = 61;
-	packet.indexes = 0;
-	return packet;
-}
-
-GamePacket packetEnd(GamePacket p)
-{
-	BYTE* n = new BYTE[p.len + 1];
-	memcpy(n, p.data, p.len);
-	delete p.data;
-	p.data = n;
-	char zero = 0;
-	memcpy(p.data+p.len, &zero, 1);
-	p.len += 1;
-	//*(int*)(p.data + 52) = p.len;
-	*(int*)(p.data + 56) = p.indexes;//p.len-60;//p.indexes;
-	*(BYTE*)(p.data + 60) = p.indexes;
-	//*(p.data + 57) = p.indexes;
-	return p;
-}
-
-GamePacket appendInt(GamePacket p, int val)
-{
-	//p.data[56] += 1;
-	BYTE* n = new BYTE[p.len + 2 + 4];
-	memcpy(n, p.data, p.len);
-	delete p.data;
-	p.data = n;
-	n[p.len] = p.indexes;
-	n[p.len + 1] = 9;
-	memcpy(n + p.len + 2, &val, 4);
-	p.len = p.len + 2 + 4;
-	p.indexes++;
-	return p;
-}
-
-GamePacket appendIntx(GamePacket p, int val)
-{
-	//p.data[56] += 1;
-	BYTE* n = new BYTE[p.len + 2 + 4];
-	memcpy(n, p.data, p.len);
-	delete p.data;
-	p.data = n;
-	n[p.len] = p.indexes;
-	n[p.len + 1] = 5;
-	memcpy(n + p.len + 2, &val, 4);
-	p.len = p.len + 2 + 4;
-	p.indexes++;
-	return p;
-}
-
-namespace Gtps
+namespace Packets
 {
 	void sendConsoleMessage(ENetPeer* peer, std::string message)
 	{
-		GamePacket p = packetEnd(appendString(appendString(createPacket(), "OnConsoleMessage"), message));
+		GamePacket p = gtps.packetEnd(gtps.appendString(gtps.appendString(gtps.createPacket(), "OnConsoleMessage"), message));
 		ENetPacket* packet = enet_packet_create(p.data,
 			p.len,
 			ENET_PACKET_FLAG_RELIABLE);
@@ -163,7 +30,7 @@ namespace Gtps
 
 	void sendDialogRequest(ENetPeer* peer, std::string message)
 	{
-		GamePacket p = packetEnd(appendString(appendString(createPacket(), "OnDialogRequest"), message));
+		GamePacket p = gtps.packetEnd(gtps.appendString(gtps.appendString(gtps.createPacket(), "OnDialogRequest"), message));
 		ENetPacket* packet = enet_packet_create(p.data,
 			p.len,
 			ENET_PACKET_FLAG_RELIABLE);
@@ -172,7 +39,7 @@ namespace Gtps
 	}
 
 	void sendSpawn(ENetPeer* peer, std::string message) {
-		GamePacket p = packetEnd(appendString(appendString(createPacket(), "OnSpawn"), message));
+		GamePacket p = gtps.packetEnd(gtps.appendString(gtps.appendString(gtps.createPacket(), "OnSpawn"), message));
 		ENetPacket* packet = enet_packet_create(p.data,
 			p.len,
 			ENET_PACKET_FLAG_RELIABLE);
@@ -182,7 +49,7 @@ namespace Gtps
 
 	void sendWorldError(ENetPeer* peer)
 	{
-		GamePacket p2 = packetEnd(appendIntx(appendString(createPacket(), "OnFailedToEnterWorld"), 1));
+		GamePacket p2 = gtps.packetEnd(gtps.appendIntx(gtps.appendString(gtps.createPacket(), "OnFailedToEnterWorld"), 1));
 		ENetPacket* packet2 = enet_packet_create(p2.data,
 			p2.len,
 			ENET_PACKET_FLAG_RELIABLE);
@@ -192,14 +59,14 @@ namespace Gtps
 
 	void sendLoginPacket(ENetPeer* peer)
 	{
-		GamePacket p = packetEnd(
-			appendString(
-				appendString(
-					appendString(
-						appendString(
-							appendInt(
-								appendString(
-									createPacket(),
+		GamePacket p = gtps.packetEnd(
+			gtps.appendString(
+				gtps.appendString(
+					gtps.appendString(
+						gtps.appendString(
+							gtps.appendInt(
+								gtps.appendString(
+									gtps.createPacket(),
 									"OnSuperMainStartAcceptLogonHrdxs47254722215a"),
 								itemdathash),
 							"ubistatic-a.akamaihd.net"),
@@ -217,10 +84,10 @@ namespace Gtps
 
 	void sendWorldRequest(ENetPeer* peer)
 	{
-		GamePacket p = packetEnd(
-			appendString(
-				appendString(
-					createPacket(),
+		GamePacket p = gtps.packetEnd(
+			gtps.appendString(
+				gtps.appendString(
+					gtps.createPacket(),
 					"OnRequestWorldSelectMenu"),
 				"default|NODEJS\nadd_button|Showing: `wWorlds``|_catselect_|0.6|3529161471|\nadd_floater|NODEJS|0|0.55|3529161471\n"));
 	
@@ -249,9 +116,9 @@ Napi::Value buildItemsDatabase(const Napi::CallbackInfo& args)
 
 		for (int i = 0; i < asdf.length(); i += 2)
 		{
-			char x = ch2n(asdf[i]);
+			char x = gtps.ch2n(asdf[i]);
 			x = x << 4;
-			x += ch2n(asdf[i + 1]);
+			x += gtps.ch2n(asdf[i + 1]);
 			memcpy(itemsDat + (i / 2), &x, 1);
 			if (asdf.length() > 60 * 2) throw 0;
 		}
@@ -277,7 +144,7 @@ Napi::Value buildItemsDatabase(const Napi::CallbackInfo& args)
 Napi::Value sendWorldError(const Napi::CallbackInfo& args)
 {	
 	Napi::Env env = args.Env();
-	Gtps::sendWorldError(utils.getPeer());
+	Packets::sendWorldError(utils.getPeer());
 
 	return Napi::Value();
 }
@@ -301,7 +168,7 @@ Napi::Value sendItemsData(const Napi::CallbackInfo& args)
 Napi::Value sendLoginPacket(const Napi::CallbackInfo& args)
 {
 	Napi::Env env = args.Env();
-	Gtps::sendLoginPacket(utils.getPeer());
+	Packets::sendLoginPacket(utils.getPeer());
 
 	return Napi::Value();
 }
@@ -311,7 +178,7 @@ Napi::Value sendConsoleMessage(const Napi::CallbackInfo& args)
 	Napi::Env env = args.Env();
 	std::string message = args[0].As<Napi::String>().Utf8Value();
 
-	Gtps::sendConsoleMessage(utils.getPeer(), message);
+	Packets::sendConsoleMessage(utils.getPeer(), message);
 
 	return Napi::Value();
 }
@@ -321,7 +188,7 @@ Napi::Value sendDialogRequest(const Napi::CallbackInfo& args)
 	Napi::Env env = args.Env();
 	std::string message = args[0].As<Napi::String>().Utf8Value();
 
-	Gtps::sendDialogRequest(utils.getPeer(), message);
+	Packets::sendDialogRequest(utils.getPeer(), message);
 
 	return Napi::Value();
 }
@@ -426,7 +293,7 @@ Napi::Value startServer(const Napi::CallbackInfo& args)
 Napi::Value sendWorldRequest(const Napi::CallbackInfo& args)
 {
 	Napi::Env env = args.Env();
-	Gtps::sendWorldRequest(utils.getPeer());
+	Packets::sendWorldRequest(utils.getPeer());
 
 	return Napi::Value();
 }
@@ -434,7 +301,7 @@ Napi::Value sendWorldRequest(const Napi::CallbackInfo& args)
 Napi::Value sendSpawn(const Napi::CallbackInfo& args)
 {
 	Napi::Env env = args.Env();
-	Gtps::sendSpawn(utils.getPeer(), args[0].As<Napi::String>().Utf8Value());
+	Packets::sendSpawn(utils.getPeer(), args[0].As<Napi::String>().Utf8Value());
 
 	return Napi::Value();
 }
