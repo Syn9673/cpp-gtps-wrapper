@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 #include "napi.h"
 #include <enet/enet.h>
 #include <fstream>
@@ -316,7 +317,7 @@ Napi::Object Init(Napi::Env env, Napi::Object exports)
 	exports.Set(Napi::String::New(env, "sendDialogRequest"), Napi::Function::New(env, sendDialogRequest));
 	exports.Set(Napi::String::New(env, "sendLoginPacket"), Napi::Function::New(env, sendLoginPacket));
 	exports.Set(Napi::String::New(env, "buildItemsDatabase"), Napi::Function::New(env, buildItemsDatabase));
-	exports.Set(Napi::String::New(env, "sendItemsData"), Napi::Function::New(env, buildItemsDatabase));
+	exports.Set(Napi::String::New(env, "sendItemsData"), Napi::Function::New(env, sendItemsData));
 	exports.Set(Napi::String::New(env, "sendWorldRequest"), Napi::Function::New(env, sendWorldRequest));
 	exports.Set(Napi::String::New(env, "sendWorldError"), Napi::Function::New(env, sendWorldError));
 	exports.Set(Napi::String::New(env, "sendSpawn"), Napi::Function::New(env, sendSpawn));
