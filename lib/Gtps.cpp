@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstring>
 #include "Gtps.h"
 
 struct GamePacket;
