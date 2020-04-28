@@ -44,6 +44,7 @@ int Gtps::ch2n(char x)
 	case 'F':
 		return 15;
 	default:
+		return 0;
 		break;
 	}
 }

@@ -1,14 +1,20 @@
 #include <enet/enet.h>
 #include <iostream>
+#include <map>
 #include <cstring>
 #include <fstream>
 #include "Utils.h"
+#include <vector>
+#include "others/DroppedItem.h"
+#include "others/WorldItem.h"
+#include "others/WorldInfo.h"
+#include "others/PlayerMoving.h"
 #include "Packet.h"
 #include "Gtps.h"
 
 BYTE* itemsDat;
 
-ENetPeer* Utils::peer;
+std::map<std::string, ENetPeer*> Utils::peers;
 ENetHost* Utils::server;
 
 void Utils::buildItemsDatabase(std::string location)
@@ -110,12 +116,20 @@ Utils::Utils()
 
 Utils::Utils(ENetPeer* _peer, ENetHost* _server)
 {
-	peer = _peer;
 	server = _server;
 }
 
-void Utils::_sendData(int num, char* data, int len)
+void Utils::_sendData(std::string id, int num, char* data, int len)
 {
+	//std::cout << getPeer(id)->connectID << std::endl;
+	if (getPeer(id) == NULL)
+	{
+		std::cout << "null";
+	}
+	std::cout << getPeer(id)->connectID << std::endl;
+	std::cout << "Utils: " << id << std::endl;
+
+
 	ENetPacket* packet = enet_packet_create(0,
 		len + 5,
 		ENET_PACKET_FLAG_RELIABLE);
@@ -127,13 +141,8 @@ void Utils::_sendData(int num, char* data, int len)
 	}
 	char zero = 0;
 	memcpy(packet->data + 4 + len, &zero, 1);
-	enet_peer_send(getPeer(), 0, packet);
+	enet_peer_send(getPeer(id), 0, packet);
 	enet_host_flush(getServer());
-}
-
-void Utils::setPeer(ENetPeer* _peer)
-{
-	peer = _peer;
 }
 
 void Utils::setServer(ENetHost* _server)
@@ -141,9 +150,9 @@ void Utils::setServer(ENetHost* _server)
 	server = _server;
 }
 
-ENetPeer* Utils::getPeer()
+ENetPeer* Utils::getPeer(std::string id)
 {
-	return peer;
+	return peers[id];
 }
 
 ENetHost* Utils::getServer()
@@ -173,4 +182,9 @@ std::string Utils::GetTextPointerFromPacket(ENetPacket* packet)
 		
 	memcpy(packet->data + packet->dataLength - 1, &zero, 1);
 	return (char*)(packet->data + 4);
+}
+
+std::map<std::string, ENetPeer*>* Utils::getPeers()
+{
+	return &peers;
 }

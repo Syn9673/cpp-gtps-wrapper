@@ -26,4 +26,4 @@ class Gtps
 		static GamePacket appendIntx(GamePacket p, int val);
 };
 
-#endif GTPS_H
+#endif

@@ -11,7 +11,7 @@ extern BYTE* itemsDat;
 class Utils
 {
 	private:
-		static ENetPeer* peer;
+		static std::map<std::string, ENetPeer*> peers;
 		static ENetHost* server;
 
 	public:
@@ -21,10 +21,10 @@ class Utils
 		unsigned char* getA(std::string fileName, int* pSizeOut, bool bAddBasePath, bool bAutoDecompress);
 		std::ifstream::pos_type filesize(const char* filename);
 		uint32_t HashString(unsigned char* str, int len);
-		void setPeer(ENetPeer* peer);
 		void setServer(ENetHost* server);
-		void _sendData(int num, char* data, int len);
-		ENetPeer* getPeer();
+		void _sendData(std::string id, int num, char* data, int len);
+		ENetPeer* getPeer(std::string id);
+		std::map<std::string, ENetPeer*>* getPeers();
 		ENetHost* getServer();
 		int GetMessageTypeFromPacket(ENetPacket* packet);
 		std::string GetTextPointerFromPacket(ENetPacket* packet);
