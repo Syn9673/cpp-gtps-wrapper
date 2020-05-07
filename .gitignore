@@ -2,5 +2,5 @@ build
 .vscode
 node_modules
 b.js
-test.json
+test.js
 package-lock.json
