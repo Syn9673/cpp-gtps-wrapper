@@ -1,16 +1,19 @@
 {
-  "name": "enetwrapperfornodejs",
-  "version": "1.0.0",
+  "name": "cpp-gtps-wrapper",
+  "version": "0.2.0",
   "description": "",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "install": "node-gyp rebuild"
+  "directories": {
+    "lib": "lib"
   },
   "dependencies": {
-    "node-addon-api": "*"
+    "node-addon-api": "^3.0.0"
   },
-  "author": "Alexander",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
   "license": "MIT",
   "gypfile": true
 }

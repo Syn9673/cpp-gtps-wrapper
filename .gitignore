@@ -1,3 +1,6 @@
 build
-.vs
-test.js
+.vscode
+node_modules
+b.js
+test.json
+package-lock.json
