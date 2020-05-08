@@ -7,6 +7,7 @@
 #include "../../Structs/GamePacket.hpp"
 #include "../../Utils/Utils.hpp"
 #include "../../Utils/Packet.hpp"
+#include <fstream>
 
 typedef unsigned char BYTE;
 
@@ -15,7 +16,7 @@ using namespace Napi;
 
 Function emit;
 ENetAddress address;
-
+	
 namespace Host
 {
 	Number init(const CallbackInfo& info)

@@ -14,10 +14,20 @@ using namespace Napi;
 Packet::Packet()
 {}
 
-void Packet::sendRawPacket(ENetPeer* peer, ENetHost* server, string data)
+void Packet::sendStringPacket(ENetPeer* peer, ENetHost* server, string data)
 {
 	enet_peer_send(peer, 0, enet_packet_create(data.c_str(), data.size(), ENET_PACKET_FLAG_RELIABLE));
 	enet_host_flush(server);
+}
+
+void Packet::sendRawPacket(ENetPeer* peer, GamePacket p)
+{
+	ENetPacket* packet = enet_packet_create(p.data,
+		p.len,
+		ENET_PACKET_FLAG_RELIABLE);
+
+	enet_peer_send(peer, 0, packet);
+	delete p.data;
 }
 
 void Packet::sendPacket(ENetPeer* peer, GamePacket _packet)

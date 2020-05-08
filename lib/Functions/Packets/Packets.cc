@@ -11,14 +11,28 @@ using namespace Napi;
 
 namespace Packets
 {
-	void sendRawPacket(const CallbackInfo& info)
+	void sendStringPacket(const CallbackInfo& info)
 	{
 		string id = info[0].As<String>().Utf8Value();
 		string data = info[1].As<String>().Utf8Value();
 		
 		ENetPeer* peer = Utils::getPeer(id);
 
-		Packet::sendRawPacket(peer, Utils::getServer(), data);
+		Packet::sendStringPacket(peer, Utils::getServer(), data);
+	}
+
+	void sendRawPacket(const CallbackInfo& info)
+	{
+		string id = info[0].As<String>().Utf8Value();
+		Buffer<char> buffer = info[1].As<Buffer<char>>();
+
+		GamePacket p;
+
+		p.data = (BYTE*)buffer.Data();
+		p.len = buffer.Length();
+		p.indexes = 0;
+		
+		Packet::sendRawPacket(Utils::getPeer(id), p);
 	}
 
 	void sendPacket(const CallbackInfo& info)
