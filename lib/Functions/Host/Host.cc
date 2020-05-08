@@ -6,6 +6,9 @@
 #include "Host.hpp"
 #include "../../Structs/GamePacket.hpp"
 #include "../../Utils/Utils.hpp"
+#include "../../Utils/Packet.hpp"
+
+typedef unsigned char BYTE;
 
 using namespace std;
 using namespace Napi;

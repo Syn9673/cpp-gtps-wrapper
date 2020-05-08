@@ -31,8 +31,8 @@ namespace HandleFunc
 		// For the Packets Property
 		Object PacketObject = Object::New(env);
 		PacketObject.Set(String::New(env, "send"), Function::New(env, Packets::sendRawPacket));
-		PacketObject.Set(String::New(env, "log"), Function::New(env, Packets::log));
 		PacketObject.Set(String::New(env, "quit"), Function::New(env, Packets::sendQuit));
+		PacketObject.Set(String::New(env, "sendPacket"), Function::New(env, Packets::sendPacket));
 
 		exports.Set(String::New(env, "Packets"), PacketObject);
 	}

@@ -21,18 +21,20 @@ namespace Packets
 		Packet::sendRawPacket(peer, Utils::getServer(), data);
 	}
 
-	void log(const CallbackInfo& info)
+	void sendPacket(const CallbackInfo& info)
 	{
 		string id = info[0].As<String>().Utf8Value();
-		string msg = info[1].As<String>().Utf8Value();
-		Buffer<char> buffer = info[2].As<Buffer<char>>();
+		Buffer<char> buffer = info[1].As<Buffer<char>>();
+		int len = info[2].As<Number>().Uint32Value();
+		int indexes = info[3].As<Number>().Uint32Value();
 
 		GamePacket p;
 
 		p.data = (BYTE*)buffer.Data();
-		p.len = 61;
+		p.len = len;
+		p.indexes = indexes;
 
-		Packet::sendConsoleMessage(Utils::getPeer(id), p, msg);
+		Packet::sendPacket(Utils::getPeer(id), p);
 	}
 
 	void sendQuit(const CallbackInfo& info)

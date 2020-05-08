@@ -16,13 +16,13 @@ Packet::Packet()
 
 void Packet::sendRawPacket(ENetPeer* peer, ENetHost* server, string data)
 {
-	enet_peer_send(peer, 0, enet_packet_create(&data, data.size(), ENET_PACKET_FLAG_RELIABLE));
+	enet_peer_send(peer, 0, enet_packet_create(data.c_str(), data.size(), ENET_PACKET_FLAG_RELIABLE));
 	enet_host_flush(server);
 }
 
-void Packet::sendConsoleMessage(ENetPeer* peer, GamePacket createdPacket, string data)
+void Packet::sendPacket(ENetPeer* peer, GamePacket _packet)
 {
-	GamePacket p = PacketEnd(AppendString(AppendString(createdPacket, "OnConsoleMessage"), data));
+	GamePacket p = PacketEnd(_packet);
 	ENetPacket* packet = enet_packet_create(p.data,
 		p.len,
 		ENET_PACKET_FLAG_RELIABLE);
@@ -32,34 +32,11 @@ void Packet::sendConsoleMessage(ENetPeer* peer, GamePacket createdPacket, string
 }
 
 // credits gt noobs
-GamePacket Packet::AppendString(GamePacket packet, string str)
-{
-	BYTE* n = new BYTE[packet.len + 2 + str.length() + 4];
-	memcpy(n, packet.data, packet.len);
-
-	delete packet.data;
-
-	packet.data = n;
-
-	n[packet.len] = packet.indexes;
-	n[packet.len + 1] = 2;
-
-	int sLen = str.length();
-
-	memcpy(n+packet.len+2, &sLen, 4);
-	memcpy(n + packet.len + 6, str.c_str(), sLen);
-
-	packet.len = packet.len + 2 + str.length() + 4;
-	packet.indexes++;
-
-	return packet;
-}
-// credits gt noobs
 GamePacket Packet::PacketEnd(GamePacket packet)
 {
 	BYTE* n = new BYTE[packet.len + 1];
 	memcpy(n, packet.data, packet.len);
-	delete packet.data;
+	//delete packet.data;
 	packet.data = n;
 	char zero = 0;
 	memcpy(packet.data+packet.len, &zero, 1);

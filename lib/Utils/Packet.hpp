@@ -6,9 +6,9 @@ class Packet
 	public:
 		Packet();
 		static void sendRawPacket(ENetPeer* peer, ENetHost* server, std::string data);
-		static void sendConsoleMessage(ENetPeer* peer, GamePacket createdPacket, std::string data);
-		static GamePacket AppendString(GamePacket packet, std::string str);
 		static GamePacket PacketEnd(GamePacket packet);
+		static void sendPacket(ENetPeer* peer, GamePacket _packet);
+
 };
 
 #endif
