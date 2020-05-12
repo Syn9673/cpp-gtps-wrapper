@@ -18,6 +18,7 @@
         ['OS=="linux"', {
           'cflags!': [ '-fno-exceptions' ],
           'cflags_cc!': [ '-fno-exceptions' ],
+          'defines': [ 'NAPI_CPP_EXCEPTIONS' ],
           'cflags_cc': ['-std=c++1z'],
           'libraries': [
             "-lenet"
