@@ -10,8 +10,6 @@ Packet _packet;
 using namespace std;
 using namespace Napi;
 
-map <string, ENetPeer*> peers;
-
 // HANDLE FUNCTIONS TO EXPORT
 #include "lib/HandleFunc.hpp"
 

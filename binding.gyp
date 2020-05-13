@@ -7,7 +7,11 @@
         "lib/HandleFunc.cc",
         "lib/Functions/Packets/Packets.cc",
         "lib/Functions/Host/Host.cc",
+        "lib/Functions/Global/Global.cc",
         "lib/Structs/GamePacket.cc",
+        "lib/Structs/DroppedItem.cc",
+        "lib/Structs/WorldInfo.cc",
+        "lib/Structs/WorldItem.cc",
         "lib/Utils/Utils.cc",
         "lib/Utils/Packet.cc"
       ],
@@ -33,10 +37,10 @@
 
           'msvs_settings': {
             'VCCLCompilerTool': {
-              'ExceptionHandling': 1,
-              'AdditionalOptions': ['/std:c++17']
+              'AdditionalOptions': ['/std:c++17', '/EHsc']
             }
-          } 
+          },
+          'defines': [ 'NAPI_CPP_EXCEPTIONS' ] 
         }]
       ]
     }

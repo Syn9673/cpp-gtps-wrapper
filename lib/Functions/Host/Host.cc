@@ -1,15 +1,11 @@
 #include <iostream>
 #include <enet/enet.h>
-#include <cstdlib>
 #include <map>
 #include "napi.h"
 #include "Host.hpp"
 #include "../../Structs/GamePacket.hpp"
 #include "../../Utils/Utils.hpp"
 #include "../../Utils/Packet.hpp"
-#include <fstream>
-
-typedef unsigned char BYTE;
 
 using namespace std;
 using namespace Napi;

@@ -6,7 +6,6 @@ class Utils
 	private:
 		static inline ENetHost* server;
 		static inline ENetAddress address;
-		static inline GamePacket createdPacket;
 
 	public:
 		static inline std::map<std::string, ENetPeer*> peers;

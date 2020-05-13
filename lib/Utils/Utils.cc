@@ -3,6 +3,9 @@
 #include <enet/enet.h>
 #include <map>
 #include "../Structs/GamePacket.hpp"
+#include "../Structs/DroppedItem.cc"
+#include "../Structs/WorldItem.cc"
+#include "../Structs/WorldInfo.cc"
 #include "Utils.hpp"
 
 using namespace std;
@@ -52,16 +55,16 @@ ENetPeer* Utils::getPeer(string id)
 // credits to gt noobs
 string Utils::getUID(ENetPeer* peer)
 {
-	if(peer==NULL) return 0;
+	if(peer == NULL) return 0;
 	string ret;
 	string serverID;
 	int serverIDSize = serverID.size();
 	ret.resize(serverIDSize + 8);
 	unsigned int id = peer->connectID;
 	static const char* digits = "0123456789ABCDEF";
-	for (unsigned int i=0; i<serverIDSize; ++i)
+	for (int i=0; i<serverIDSize; ++i)
 		ret[i] = serverID[i];
-	for (unsigned int i=0; i<8; ++i)
+	for (int i=0; i<8; ++i)
 		ret[i+serverIDSize] = digits[(id>>(i<<2)) & 0x0f];
 	return ret;
 }

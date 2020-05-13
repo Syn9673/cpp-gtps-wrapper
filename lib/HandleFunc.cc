@@ -8,7 +8,7 @@
 #include "Functions/Host/Host.hpp"
 #include "Functions/Packets/Packets.hpp"
 
-#define VERSION "0.2.0"
+#define VERSION "0.3.0"
 
 using namespace std;
 using namespace Napi;
@@ -33,7 +33,6 @@ namespace HandleFunc
 		PacketObject.Set(String::New(env, "send"), Function::New(env, Packets::sendStringPacket));
 		PacketObject.Set(String::New(env, "quit"), Function::New(env, Packets::sendQuit));
 		PacketObject.Set(String::New(env, "sendPacket"), Function::New(env, Packets::sendPacket));
-		PacketObject.Set(String::New(env, "sendRawPacket"), Function::New(env, Packets::sendRawPacket));
 
 		exports.Set(String::New(env, "Packets"), PacketObject);
 	}

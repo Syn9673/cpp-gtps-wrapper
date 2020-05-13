@@ -21,34 +21,19 @@ namespace Packets
 		Packet::sendStringPacket(peer, Utils::getServer(), data);
 	}
 
-	void sendRawPacket(const CallbackInfo& info)
-	{
-		string id = info[0].As<String>().Utf8Value();
-		Buffer<char> buffer = info[1].As<Buffer<char>>();
-
-		GamePacket p;
-
-		p.data = (BYTE*)buffer.Data();
-		p.len = buffer.Length();
-		p.indexes = 0;
-		
-		Packet::sendRawPacket(Utils::getPeer(id), p);
-	}
-
 	void sendPacket(const CallbackInfo& info)
 	{
 		string id = info[0].As<String>().Utf8Value();
 		Buffer<char> buffer = info[1].As<Buffer<char>>();
 		int len = info[2].As<Number>().Uint32Value();
-		int indexes = info[3].As<Number>().Uint32Value();
 
-		GamePacket p;
+		BYTE* data = (BYTE*)buffer.Data();
 
-		p.data = (BYTE*)buffer.Data();
-		p.len = len;
-		p.indexes = indexes;
+		ENetPacket* packet = enet_packet_create(data,
+			len,
+			ENET_PACKET_FLAG_RELIABLE);
 
-		Packet::sendPacket(Utils::getPeer(id), p);
+		enet_peer_send(Utils::getPeer(id), 0, packet);
 	}
 
 	void sendQuit(const CallbackInfo& info)
