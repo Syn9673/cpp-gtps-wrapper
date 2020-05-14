@@ -8,8 +8,7 @@
         "lib/Functions/Packets/Packets.cc",
         "lib/Functions/Host/Host.cc",
         "lib/Structs/GamePacket.cc",
-        "lib/Utils/Utils.cc",
-        "lib/Utils/Packet.cc"
+        "lib/Utils/Utils.cc"
       ],
       'include_dirs': [
         "<!@(node -p \"require('node-addon-api').include\")",

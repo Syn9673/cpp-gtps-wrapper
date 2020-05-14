@@ -5,7 +5,8 @@
 #include "Host.hpp"
 #include "../../Structs/GamePacket.hpp"
 #include "../../Utils/Utils.hpp"
-#include "../../Utils/Packet.hpp"
+
+typedef unsigned int enet_uint32;
 
 using namespace std;
 using namespace Napi;
@@ -19,6 +20,28 @@ namespace Host
 	{
 		Env env = info.Env();
 		return Number::New(env, enet_initialize());
+	}
+
+	Value checkIfConnected(const CallbackInfo& info)
+	{
+		Env env = info.Env();
+		string peerID = info[0].As<String>().Utf8Value();
+		ENetPeer* peer = Utils::getPeer(peerID);
+
+		if (!peer)
+		{
+			return Boolean::New(env, false);
+		}
+
+		else if (peer->state != ENET_PEER_STATE_CONNECTED)
+		{
+			return Boolean::New(env, false);
+		}
+		
+		else
+		{
+			return Boolean::New(env, true);
+		}
 	}
 
 	void create(const CallbackInfo& info)
@@ -64,6 +87,7 @@ namespace Host
 					case ENET_EVENT_TYPE_CONNECT:
 					{
 						string peerID = Utils::getUID(event.peer);
+
 						Utils::peers.emplace(peerID, event.peer);
 
 						emit.Call({
@@ -76,6 +100,7 @@ namespace Host
 					case ENET_EVENT_TYPE_RECEIVE:
 					{
 						string peerID = Utils::getUID(event.peer);
+
 						emit.Call({
 							String::New(env, "receive"),
 							ArrayBuffer::New(env, packet->data, packet->dataLength),
@@ -83,8 +108,16 @@ namespace Host
 						});
 						break;
 					}
+
+					case ENET_EVENT_TYPE_DISCONNECT:
+					{
+						emit.Call({
+							String::New(env, "disconnect")
+						});
+						break;
+					}
 				}
 			}
 		}
 	}
-}
+}	

@@ -25,6 +25,7 @@ namespace HandleFunc
 		HostObject.Set(String::New(env, "create"), Function::New(env, Host::create));
 		HostObject.Set(String::New(env, "start"), Function::New(env, Host::start));
 		HostObject.Set(String::New(env, "init"), Function::New(env, Host::init));
+		HostObject.Set(String::New(env, "checkIfConnected"), Function::New(env, Host::checkIfConnected));
 
 		exports.Set(String::New(env, "Host"), HostObject);
 
@@ -33,6 +34,7 @@ namespace HandleFunc
 		PacketObject.Set(String::New(env, "send"), Function::New(env, Packets::sendStringPacket));
 		PacketObject.Set(String::New(env, "quit"), Function::New(env, Packets::sendQuit));
 		PacketObject.Set(String::New(env, "sendPacket"), Function::New(env, Packets::sendPacket));
+		PacketObject.Set(String::New(env, "sendPacketRaw"), Function::New(env, Packets::sendPacketRaw));
 
 		exports.Set(String::New(env, "Packets"), PacketObject);
 	}

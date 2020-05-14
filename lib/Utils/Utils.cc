@@ -1,9 +1,12 @@
 #include <iostream>
 #include "napi.h"
 #include <enet/enet.h>
+#include <cstring>
 #include <map>
 #include "../Structs/GamePacket.hpp"
 #include "Utils.hpp"
+
+typedef unsigned int enet_uint32;
 
 using namespace std;
 using namespace Napi;

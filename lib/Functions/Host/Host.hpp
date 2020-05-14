@@ -4,6 +4,7 @@
 namespace Host
 {
 	Napi::Number init(const Napi::CallbackInfo& info);
+	Napi::Value checkIfConnected(const Napi::CallbackInfo& info);
 	void create(const Napi::CallbackInfo& info);
 	void start(const Napi::CallbackInfo& info);
 }
