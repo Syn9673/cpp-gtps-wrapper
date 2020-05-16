@@ -6,14 +6,13 @@
 #include "../../Structs/GamePacket.hpp"
 #include "../../Utils/Utils.hpp"
 
-typedef unsigned int enet_uint32;
-
 using namespace std;
 using namespace Napi;
 
 Function emit;
 ENetAddress address;
-	
+
+
 namespace Host
 {
 	Number init(const CallbackInfo& info)
@@ -77,47 +76,66 @@ namespace Host
 		emit = info[0].As<Function>();
 
 		ENetEvent event;
-		while(true)
+		while(enet_host_service(server, &event, 1000) > 0)
 		{
-			while(enet_host_service(server, &event, 1000) > 0)
+			ENetPacket* packet = event.packet;
+			switch(event.type)
 			{
-				ENetPacket* packet = event.packet;
-				switch(event.type)
+				case ENET_EVENT_TYPE_CONNECT:
 				{
-					case ENET_EVENT_TYPE_CONNECT:
-					{
-						string peerID = Utils::getUID(event.peer);
+					string peerID = Utils::getUID(event.peer);
+					int length = peerID.length();
+					char* cpeerID = new char[length + 1];
 
-						Utils::peers.emplace(peerID, event.peer);
+					strcpy(cpeerID, peerID.c_str());
 
-						emit.Call({
-							String::New(env, "connect"),
-							String::New(env, peerID)
-						});
-						break;
-					}
+					event.peer->data = cpeerID;
 
-					case ENET_EVENT_TYPE_RECEIVE:
-					{
-						string peerID = Utils::getUID(event.peer);
+					Utils::peers.emplace(peerID, event.peer);
 
-						emit.Call({
-							String::New(env, "receive"),
-							ArrayBuffer::New(env, packet->data, packet->dataLength),
-							String::New(env, peerID)
-						});
-						break;
-					}
+					emit.Call({
+						String::New(env, "connect"),
+						String::New(env, peerID)
+					});
+					break;
+				}
 
-					case ENET_EVENT_TYPE_DISCONNECT:
-					{
-						emit.Call({
-							String::New(env, "disconnect")
-						});
-						break;
-					}
+				case ENET_EVENT_TYPE_RECEIVE:
+				{
+					string peerID = Utils::getUID(event.peer);
+
+					emit.Call({
+						String::New(env, "receive"),
+						ArrayBuffer::New(env, packet->data, packet->dataLength),
+						String::New(env, peerID)
+					});
+					break;
+				}
+
+				case ENET_EVENT_TYPE_DISCONNECT:
+				{
+					char* cpeerID = ((char*)event.peer->data);
+
+					emit.Call({
+						String::New(env, "disconnect"),
+						String::New(env, cpeerID)
+					});
+					break;
 				}
 			}
 		}
+	}
+
+	String getIP(const CallbackInfo& info)
+	{
+		Env env = info.Env();
+		string peerid = info[0].As<String>().Utf8Value();	
+		ENetPeer* peer = Utils::getPeer(peerid);
+
+		char clientConnection[16];
+		enet_address_get_host_ip(&peer->address, clientConnection, 16);
+
+		string ip(clientConnection);
+		return String::New(env, ip);
 	}
 }	

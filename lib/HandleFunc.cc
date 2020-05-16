@@ -26,6 +26,7 @@ namespace HandleFunc
 		HostObject.Set(String::New(env, "start"), Function::New(env, Host::start));
 		HostObject.Set(String::New(env, "init"), Function::New(env, Host::init));
 		HostObject.Set(String::New(env, "checkIfConnected"), Function::New(env, Host::checkIfConnected));
+		HostObject.Set(String::New(env, "getIP"), Function::New(env, Host::getIP));
 
 		exports.Set(String::New(env, "Host"), HostObject);
 
